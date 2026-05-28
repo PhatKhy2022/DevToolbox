@@ -1,0 +1,30 @@
+{
+  "name": "dev-toolbox",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "typecheck": "vue-tsc -b"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "latest",
+    "@lucide/vue": "latest",
+    "papaparse": "latest",
+    "pinia": "latest",
+    "read-excel-file": "latest",
+    "vue": "latest",
+    "yaml": "latest"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "latest",
+    "@types/papaparse": "latest",
+    "@vue/tsconfig": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vue-tsc": "latest"
+  }
+}

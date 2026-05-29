@@ -4,15 +4,8 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { copyToClipboard, downloadText } from '@/utils/browser'
 import { usePreferencesStore } from '@/stores/preferences'
 
-// CodeMirror imports
-import { EditorView, basicSetup } from 'codemirror'
-import { EditorState, Compartment } from '@codemirror/state'
-import { javascript } from '@codemirror/lang-javascript'
-import { json } from '@codemirror/lang-json'
-import { yaml } from '@codemirror/lang-yaml'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { keymap } from '@codemirror/view'
-import { indentWithTab } from '@codemirror/commands'
+// Monaco imports
+import * as monaco from 'monaco-editor'
 
 const props = withDefaults(
   defineProps<{
@@ -39,94 +32,82 @@ const emit = defineEmits<{
 const preferences = usePreferencesStore()
 const editorRef = ref<HTMLElement | null>(null)
 const copied = ref(false)
-let view: EditorView | null = null
+let editor: monaco.editor.IStandaloneCodeEditor | null = null
 
-// Compartments for dynamic configuration
-const languageConf = new Compartment()
-const themeConf = new Compartment()
-const readonlyConf = new Compartment()
-
-function getLanguageExtension(lang?: string) {
-  switch (lang?.toLowerCase()) {
-    case 'javascript':
-    case 'js':
-      return javascript()
-    case 'json':
-      return json()
-    case 'yaml':
-    case 'yml':
-      return yaml()
-    default:
-      return []
+function getMonacoLanguage(lang?: string) {
+  const map: Record<string, string> = {
+    js: 'javascript',
+    yml: 'yaml',
   }
+  const l = lang?.toLowerCase() || 'text'
+  return map[l] || l
 }
 
-function getTheme() {
-  return preferences.darkMode ? oneDark : []
+function updateTheme() {
+  if (editor) {
+    monaco.editor.setTheme(preferences.darkMode ? 'vs-dark' : 'vs')
+  }
 }
 
 onMounted(() => {
   if (!editorRef.value) return
 
-  const startState = EditorState.create({
-    doc: props.modelValue,
-    extensions: [
-      basicSetup,
-      keymap.of([indentWithTab]),
-      languageConf.of(getLanguageExtension(props.language)),
-      themeConf.of(getTheme()),
-      readonlyConf.of(EditorState.readOnly.of(props.readonly)),
-      EditorView.updateListener.of((update) => {
-        if (update.docChanged) {
-          emit('update:modelValue', update.state.doc.toString())
-        }
-      }),
-      EditorView.theme({
-        '&': { height: '100%', fontSize: '14px' },
-        '.cm-scroller': { fontFamily: 'JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' },
-        '&.cm-focused': { outline: 'none' }
-      })
-    ],
+  editor = monaco.editor.create(editorRef.value, {
+    value: props.modelValue,
+    language: getMonacoLanguage(props.language),
+    theme: preferences.darkMode ? 'vs-dark' : 'vs',
+    readOnly: props.readonly,
+    automaticLayout: true,
+    minimap: { enabled: false },
+    fontSize: 14,
+    fontFamily: 'JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+    scrollBeyondLastLine: false,
+    lineNumbers: 'on',
+    roundedSelection: true,
+    scrollbar: {
+      vertical: 'visible',
+      horizontal: 'visible',
+    },
+    padding: { top: 12, bottom: 12 }
   })
 
-  view = new EditorView({
-    state: startState,
-    parent: editorRef.value,
+  editor.onDidChangeModelContent(() => {
+    const value = editor?.getValue() || ''
+    if (value !== props.modelValue) {
+      emit('update:modelValue', value)
+    }
   })
 })
 
 onUnmounted(() => {
-  view?.destroy()
+  editor?.dispose()
 })
 
 // Sync modelValue -> Editor
 watch(() => props.modelValue, (newValue) => {
-  if (view && newValue !== view.state.doc.toString()) {
-    view.dispatch({
-      changes: { from: 0, to: view.state.doc.length, insert: newValue }
-    })
+  if (editor && newValue !== editor.getValue()) {
+    editor.setValue(newValue)
   }
 })
 
 // Sync language -> Editor
 watch(() => props.language, (newLang) => {
-  view?.dispatch({
-    effects: languageConf.reconfigure(getLanguageExtension(newLang))
-  })
+  if (editor) {
+    const model = editor.getModel()
+    if (model) {
+      monaco.editor.setModelLanguage(model, getMonacoLanguage(newLang))
+    }
+  }
 })
 
 // Sync readonly -> Editor
 watch(() => props.readonly, (newReadonly) => {
-  view?.dispatch({
-    effects: readonlyConf.reconfigure(EditorState.readOnly.of(newReadonly))
-  })
+  editor?.updateOptions({ readOnly: newReadonly })
 })
 
 // Sync dark mode -> Editor
 watch(() => preferences.darkMode, () => {
-  view?.dispatch({
-    effects: themeConf.reconfigure(getTheme())
-  })
+  updateTheme()
 })
 
 async function copy() {
@@ -160,23 +141,13 @@ async function copy() {
 </template>
 
 <style>
-/* CodeMirror Dark Mode Tweaks */
-.dark .cm-editor {
+/* Monaco Overrides */
+.monaco-editor {
+  padding: 0;
+}
+.vs-dark .monaco-editor, 
+.vs-dark .monaco-editor .margin,
+.vs-dark .monaco-editor-background {
   background-color: #020617 !important; /* slate-950 */
-}
-.dark .cm-gutters {
-  background-color: #020617 !important;
-  border-right: 1px solid #1e293b !important; /* slate-800 */
-  color: #64748b !important; /* slate-500 */
-}
-
-/* CodeMirror Light Mode Tweaks */
-.cm-editor {
-  background-color: #ffffff;
-}
-.cm-gutters {
-  background-color: #f8fafc !important; /* slate-50 */
-  border-right: 1px solid #e2e8f0 !important; /* slate-200 */
-  color: #94a3b8 !important; /* slate-400 */
 }
 </style>

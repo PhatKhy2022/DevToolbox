@@ -1,6 +1,7 @@
 import type { Component } from 'vue'
 
 export type ToolId =
+  | 'dashboard'
   | 'json'
   | 'csv-json'
   | 'yaml-json'
@@ -8,6 +9,7 @@ export type ToolId =
   | 'uuid'
   | 'base64'
   | 'timestamp'
+  | 'js-playground'
 
 export interface ToolDefinition {
   id: ToolId

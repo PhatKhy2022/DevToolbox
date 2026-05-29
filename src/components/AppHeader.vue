@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Moon, PanelLeftClose, PanelLeftOpen, Plus, Search, Sun } from '@lucide/vue'
+import { Moon, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Search, Sun } from '@lucide/vue'
 import { usePreferencesStore } from '@/stores/preferences'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { detectContent } from '@/utils/detect'
+import type { ToolId } from '@/types/tool'
 
 const preferences = usePreferencesStore()
 const workspace = useWorkspaceStore()
@@ -10,17 +11,26 @@ const workspace = useWorkspaceStore()
 function handleSearch(event: Event) {
   const value = (event.target as HTMLInputElement).value
   const detected = detectContent(value)
-  const toolMap = {
-    json: 'json',
-    yaml: 'yaml-json',
-    jwt: 'jwt',
-    csv: 'csv-json',
-    base64: 'base64',
-    text: workspace.activeTool,
-  } as const
+  
+  let targetTool: ToolId = workspace.activeTool
+  if (detected !== 'text') {
+    const toolMap = {
+      json: 'json',
+      yaml: 'yaml-json',
+      jwt: 'jwt',
+      csv: 'csv-json',
+      base64: 'base64',
+    } as const
+    targetTool = toolMap[detected as keyof typeof toolMap]
+  } else if (workspace.activeTool === 'dashboard') {
+    targetTool = 'json'
+  }
 
-  workspace.setTool(toolMap[detected])
+  workspace.setTool(targetTool)
   workspace.updateActiveInput(value)
+  
+  // Clear input after search
+  ;(event.target as HTMLInputElement).value = ''
 }
 </script>
 
@@ -48,6 +58,11 @@ function handleSearch(event: Event) {
     <button class="icon-button" title="Toggle dark mode" @click="preferences.toggleDarkMode()">
       <Sun v-if="preferences.darkMode" class="size-4" />
       <Moon v-else class="size-4" />
+    </button>
+
+    <button class="icon-button hidden xl:flex" title="Toggle history" @click="preferences.toggleHistory()">
+      <PanelRightClose v-if="preferences.historyVisible" class="size-4" />
+      <PanelRightOpen v-else class="size-4" />
     </button>
   </header>
 </template>

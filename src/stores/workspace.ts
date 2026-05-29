@@ -17,29 +17,17 @@ function id(prefix: string): string {
 }
 
 const initialState = loadJson<WorkspaceState>(STORAGE_KEY, {
-  activeTool: 'json',
+  activeTool: 'dashboard',
   history: [],
   snippets: [],
-  tabs: [
-    {
-      id: id('tab'),
-      title: 'JSON',
-      toolId: 'json',
-      input: '',
-      updatedAt: new Date().toISOString(),
-    },
-  ],
+  tabs: [],
   activeTabId: '',
 })
-
-if (!initialState.activeTabId) {
-  initialState.activeTabId = initialState.tabs[0].id
-}
 
 export const useWorkspaceStore = defineStore('workspace', {
   state: (): WorkspaceState => ({ ...initialState }),
   getters: {
-    activeTab: (state) => state.tabs.find((tab) => tab.id === state.activeTabId) ?? state.tabs[0],
+    activeTab: (state) => state.tabs.find((tab) => tab.id === state.activeTabId),
   },
   actions: {
     persist() {
@@ -53,15 +41,23 @@ export const useWorkspaceStore = defineStore('workspace', {
     },
     setTool(toolId: ToolId) {
       this.activeTool = toolId
-      const matchingTab = this.tabs.find((tab) => tab.toolId === toolId)
-      if (matchingTab) {
-        this.activeTabId = matchingTab.id
+      if (toolId === 'dashboard') {
+        this.activeTabId = ''
       } else {
-        this.addTab(toolId)
+        const matchingTab = this.tabs.find((tab) => tab.toolId === toolId)
+        if (matchingTab) {
+          this.activeTabId = matchingTab.id
+        } else {
+          this.addTab(toolId)
+        }
       }
       this.persist()
     },
     addTab(toolId: ToolId) {
+      if (toolId === 'dashboard') {
+        this.setTool('dashboard')
+        return
+      }
       const tab: WorkspaceTab = {
         id: id('tab'),
         title: toolId.toUpperCase(),
@@ -81,13 +77,22 @@ export const useWorkspaceStore = defineStore('workspace', {
       this.persist()
     },
     closeTab(tabId: string) {
-      if (this.tabs.length === 1) return
       const index = this.tabs.findIndex((tab) => tab.id === tabId)
       this.tabs = this.tabs.filter((tab) => tab.id !== tabId)
-      if (this.activeTabId === tabId) {
+      
+      if (this.tabs.length === 0) {
+        this.activeTabId = ''
+        this.activeTool = 'dashboard'
+      } else if (this.activeTabId === tabId) {
         this.activeTabId = this.tabs[Math.max(0, index - 1)].id
-        this.activeTool = this.activeTab.toolId
+        this.activeTool = this.activeTab?.toolId ?? 'dashboard'
       }
+      this.persist()
+    },
+    clearTabs() {
+      this.tabs = []
+      this.activeTabId = ''
+      this.activeTool = 'dashboard'
       this.persist()
     },
     addHistory(toolId: ToolId, label: string, value: string) {
@@ -97,8 +102,24 @@ export const useWorkspaceStore = defineStore('workspace', {
       ].slice(0, 30)
       this.persist()
     },
+    clearHistory() {
+      this.history = []
+      this.persist()
+    },
+    deleteHistoryItem(id: string) {
+      this.history = this.history.filter((item) => item.id !== id)
+      this.persist()
+    },
     saveSnippet(name: string, toolId: ToolId, value: string) {
       this.snippets.unshift({ id: id('snippet'), name, toolId, value, createdAt: new Date().toISOString() })
+      this.persist()
+    },
+    clearSnippets() {
+      this.snippets = []
+      this.persist()
+    },
+    deleteSnippet(id: string) {
+      this.snippets = this.snippets.filter((snippet) => snippet.id !== id)
       this.persist()
     },
   },

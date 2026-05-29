@@ -1,6 +1,7 @@
 import type { Component } from 'vue'
 
 export type ToolId =
+  | 'dashboard'
   | 'json'
   | 'csv-json'
   | 'yaml-json'

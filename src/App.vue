@@ -12,14 +12,15 @@ const preferences = usePreferencesStore()
 const workspace = useWorkspaceStore()
 
 const tools: ToolDefinition[] = [
-  { id: 'dashboard', name: 'Dashboard', description: 'Overview of all available tools.', shortcut: '0', component: defineAsyncComponent(() => import('@/tools/Dashboard.vue')) },
-  { id: 'json', name: 'JSON Formatter', description: 'Pretty print, minify, and validate JSON.', shortcut: '1', component: defineAsyncComponent(() => import('@/tools/JsonFormatter.vue')) },
-  { id: 'csv-json', name: 'CSV JSON', description: 'Convert CSV or XLSX to JSON and JSON to CSV.', shortcut: '2', component: defineAsyncComponent(() => import('@/tools/CsvJsonConverter.vue')) },
-  { id: 'yaml-json', name: 'YAML JSON', description: 'Convert YAML to JSON and JSON to YAML.', shortcut: '3', component: defineAsyncComponent(() => import('@/tools/YamlJsonConverter.vue')) },
-  { id: 'jwt', name: 'JWT Decoder', description: 'Decode JWT payloads and expiry claims.', shortcut: '4', component: defineAsyncComponent(() => import('@/tools/JwtDecoder.vue')) },
-  { id: 'uuid', name: 'UUID Generator', description: 'Generate single or batch UUID v4 values.', shortcut: '5', component: defineAsyncComponent(() => import('@/tools/UuidGenerator.vue')) },
-  { id: 'base64', name: 'Base64 Tool', description: 'Encode and decode text or files.', shortcut: '6', component: defineAsyncComponent(() => import('@/tools/Base64Tool.vue')) },
-  { id: 'timestamp', name: 'Timestamp Converter', description: 'Convert Unix timestamps and dates.', shortcut: '7', component: defineAsyncComponent(() => import('@/tools/TimestampConverter.vue')) },
+  { id: 'dashboard', name: 'Dashboard', description: 'Overview of all available tools.', shortcut: '1', component: defineAsyncComponent(() => import('@/tools/Dashboard.vue')) },
+  { id: 'json', name: 'JSON Formatter', description: 'Pretty print, minify, and validate JSON.', shortcut: '2', component: defineAsyncComponent(() => import('@/tools/JsonFormatter.vue')) },
+  { id: 'csv-json', name: 'CSV JSON', description: 'Convert CSV or XLSX to JSON and JSON to CSV.', shortcut: '3', component: defineAsyncComponent(() => import('@/tools/CsvJsonConverter.vue')) },
+  { id: 'yaml-json', name: 'YAML JSON', description: 'Convert YAML to JSON and JSON to YAML.', shortcut: '4', component: defineAsyncComponent(() => import('@/tools/YamlJsonConverter.vue')) },
+  { id: 'jwt', name: 'JWT Decoder', description: 'Decode JWT payloads and expiry claims.', shortcut: '5', component: defineAsyncComponent(() => import('@/tools/JwtDecoder.vue')) },
+  { id: 'uuid', name: 'UUID Generator', description: 'Generate single or batch UUID v4 values.', shortcut: '6', component: defineAsyncComponent(() => import('@/tools/UuidGenerator.vue')) },
+  { id: 'base64', name: 'Base64 Tool', description: 'Encode and decode text or files.', shortcut: '7', component: defineAsyncComponent(() => import('@/tools/Base64Tool.vue')) },
+  { id: 'timestamp', name: 'Timestamp Converter', description: 'Convert Unix timestamps and dates.', shortcut: '8', component: defineAsyncComponent(() => import('@/tools/TimestampConverter.vue')) },
+  { id: 'js-playground', name: 'JS Playground', description: 'Run JavaScript code and see console output.', shortcut: '9', component: defineAsyncComponent(() => import('@/tools/JsPlayground.vue')) },
 ]
 
 const activeTool = computed(() => tools.find((tool) => tool.id === workspace.activeTool) ?? tools[0])

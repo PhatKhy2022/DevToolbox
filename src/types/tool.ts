@@ -9,6 +9,7 @@ export type ToolId =
   | 'uuid'
   | 'base64'
   | 'timestamp'
+  | 'js-playground'
 
 export interface ToolDefinition {
   id: ToolId

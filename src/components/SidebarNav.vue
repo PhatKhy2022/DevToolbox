@@ -8,6 +8,7 @@ import {
   Fingerprint,
   KeyRound,
   LayoutDashboard,
+  Play,
 } from '@lucide/vue'
 import type { ToolDefinition } from '@/types/tool'
 import { usePreferencesStore } from '@/stores/preferences'
@@ -24,6 +25,7 @@ const icons = {
   uuid: Fingerprint,
   base64: Binary,
   timestamp: Clock3,
+  'js-playground': Play,
 }
 
 const preferences = usePreferencesStore()

@@ -10,8 +10,9 @@
     "typecheck": "vue-tsc -b"
   },
   "dependencies": {
-    "@vitejs/plugin-vue": "latest",
     "@lucide/vue": "latest",
+    "@vitejs/plugin-vue": "latest",
+    "monaco-editor": "^0.55.1",
     "papaparse": "latest",
     "pinia": "latest",
     "read-excel-file": "latest",

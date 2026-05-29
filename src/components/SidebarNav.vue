@@ -7,6 +7,8 @@ import {
   FileSpreadsheet,
   Fingerprint,
   KeyRound,
+  LayoutDashboard,
+  Play,
 } from '@lucide/vue'
 import type { ToolDefinition } from '@/types/tool'
 import { usePreferencesStore } from '@/stores/preferences'
@@ -15,6 +17,7 @@ import { useWorkspaceStore } from '@/stores/workspace'
 defineProps<{ tools: ToolDefinition[] }>()
 
 const icons = {
+  dashboard: LayoutDashboard,
   json: Braces,
   'csv-json': FileSpreadsheet,
   'yaml-json': FileJson2,
@@ -22,6 +25,7 @@ const icons = {
   uuid: Fingerprint,
   base64: Binary,
   timestamp: Clock3,
+  'js-playground': Play,
 }
 
 const preferences = usePreferencesStore()

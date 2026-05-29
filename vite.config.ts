@@ -10,4 +10,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  optimizeDeps: {
+    include: [
+      'monaco-editor/esm/vs/editor/editor.worker',
+      'monaco-editor/esm/vs/language/json/json.worker',
+      'monaco-editor/esm/vs/language/typescript/ts.worker',
+    ],
+  },
 })

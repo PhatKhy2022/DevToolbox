@@ -9,6 +9,7 @@ import {
   KeyRound,
   LayoutDashboard,
   Play,
+  BookOpen,
 } from '@lucide/vue'
 import type { ToolDefinition } from '@/types/tool'
 import { usePreferencesStore } from '@/stores/preferences'
@@ -26,6 +27,7 @@ const icons = {
   base64: Binary,
   timestamp: Clock3,
   'js-playground': Play,
+  'english-vocab': BookOpen,
 }
 
 const preferences = usePreferencesStore()

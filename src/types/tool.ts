@@ -10,6 +10,7 @@ export type ToolId =
   | 'base64'
   | 'timestamp'
   | 'js-playground'
+  | 'english-vocab'
 
 export interface ToolDefinition {
   id: ToolId

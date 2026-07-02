@@ -4,6 +4,8 @@ import { loadJson, saveJson } from '@/utils/storage'
 
 const STORAGE_KEY = 'devtoolbox:workspace'
 
+const TOOLS_WITHOUT_TABS: ToolId[] = ['dashboard', 'english-vocab']
+
 interface WorkspaceState {
   activeTool: ToolId
   history: HistoryItem[]
@@ -41,7 +43,7 @@ export const useWorkspaceStore = defineStore('workspace', {
     },
     setTool(toolId: ToolId) {
       this.activeTool = toolId
-      if (toolId === 'dashboard') {
+      if (TOOLS_WITHOUT_TABS.includes(toolId)) {
         this.activeTabId = ''
       } else {
         const matchingTab = this.tabs.find((tab) => tab.toolId === toolId)
@@ -54,8 +56,8 @@ export const useWorkspaceStore = defineStore('workspace', {
       this.persist()
     },
     addTab(toolId: ToolId) {
-      if (toolId === 'dashboard') {
-        this.setTool('dashboard')
+      if (TOOLS_WITHOUT_TABS.includes(toolId)) {
+        this.setTool(toolId)
         return
       }
       const tab: WorkspaceTab = {

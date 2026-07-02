@@ -11,6 +11,7 @@ Modern frontend-only developer utility toolbox built with Vue 3, TypeScript, Vit
 - UUID v4 generator with batch generation
 - Base64 text and file encode/decode
 - Unix timestamp and date conversion with timezone selection
+- English vocabulary flashcards with local login, sets, editing, and study mode (Quizlet-style)
 - Drag and drop uploads, content auto-detection, history, saved snippets, dark mode, and keyboard shortcuts
 
 ## Setup
@@ -38,4 +39,4 @@ src/
   utils/            File, parser, storage, clipboard, and download helpers
 ```
 
-All data stays in the browser through localStorage.
+All data stays in the browser through localStorage. Vocabulary accounts and decks are stored per browser (not synced to a server).

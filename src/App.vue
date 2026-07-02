@@ -21,16 +21,17 @@ const tools: ToolDefinition[] = [
   { id: 'base64', name: 'Base64 Tool', description: 'Encode and decode text or files.', shortcut: '7', component: defineAsyncComponent(() => import('@/tools/Base64Tool.vue')) },
   { id: 'timestamp', name: 'Timestamp Converter', description: 'Convert Unix timestamps and dates.', shortcut: '8', component: defineAsyncComponent(() => import('@/tools/TimestampConverter.vue')) },
   { id: 'js-playground', name: 'JS Playground', description: 'Run JavaScript code and see console output.', shortcut: '9', component: defineAsyncComponent(() => import('@/tools/JsPlayground.vue')) },
+  { id: 'english-vocab', name: 'English Vocabulary', description: 'Flashcard sets with login, editing, and study mode.', shortcut: '0', component: defineAsyncComponent(() => import('@/tools/EnglishVocabulary.vue')) },
 ]
 
 const activeTool = computed(() => tools.find((tool) => tool.id === workspace.activeTool) ?? tools[0])
 
 function selectToolFromKey(event: KeyboardEvent) {
   if (!event.ctrlKey && !event.metaKey) return
-  const index = Number(event.key) - 1
-  if (index >= 0 && index < tools.length) {
+  const tool = tools.find((item) => item.shortcut === event.key)
+  if (tool) {
     event.preventDefault()
-    workspace.setTool(tools[index].id)
+    workspace.setTool(tool.id)
   }
   if (event.key.toLowerCase() === 'n') {
     event.preventDefault()

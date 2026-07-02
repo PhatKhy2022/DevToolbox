@@ -8,7 +8,8 @@ import {
   KeyRound, 
   Type, 
   Clock,
-  Play
+  Play,
+  BookOpen,
 } from '@lucide/vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { ToolId } from '@/types/tool'
@@ -24,6 +25,7 @@ const tools = [
   { id: 'base64', name: 'Base64 Tool', description: 'Encode or decode text and files.', icon: Type, color: 'text-blue-500' },
   { id: 'timestamp', name: 'Timestamp Converter', description: 'Convert between Unix time and dates.', icon: Clock, color: 'text-cyan-500' },
   { id: 'js-playground', name: 'JS Playground', description: 'Run JavaScript code snippets and see console output.', icon: Play, color: 'text-indigo-600' },
+  { id: 'english-vocab', name: 'English Vocabulary', description: 'Create flashcard sets, log in, and study like Quizlet.', icon: BookOpen, color: 'text-orange-500' },
 ] as const
 
 function selectTool(id: ToolId) {

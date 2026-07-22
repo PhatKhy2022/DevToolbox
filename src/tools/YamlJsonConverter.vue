@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import YAML from 'yaml'
+import EditorSplitView from '@/components/EditorSplitView.vue'
 import ToolEditor from '@/components/ToolEditor.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 
@@ -34,15 +35,19 @@ function jsonToYaml() {
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-3">
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
     <div class="flex flex-wrap items-center gap-2">
       <button class="primary-button" @click="yamlToJson">YAML to JSON</button>
       <button class="secondary-button" @click="jsonToYaml">JSON to YAML</button>
       <span class="text-sm text-slate-500 dark:text-slate-400">{{ message }}</span>
     </div>
-    <div class="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
-      <ToolEditor v-model="input" title="Input" language="yaml/json" placeholder="Paste YAML or JSON" filename="input.yml" @save="workspace.saveSnippet('YAML/JSON input', 'yaml-json', $event)" />
-      <ToolEditor v-model="output" title="Output" language="yaml/json" readonly filename="converted.yml" @save="workspace.saveSnippet('YAML/JSON output', 'yaml-json', $event)" />
-    </div>
+    <EditorSplitView>
+      <template #first>
+        <ToolEditor v-model="input" title="Input" language="yaml/json" placeholder="Paste YAML or JSON" filename="input.yml" @save="workspace.saveSnippet('YAML/JSON input', 'yaml-json', $event)" />
+      </template>
+      <template #second>
+        <ToolEditor v-model="output" title="Output" language="yaml/json" readonly filename="converted.yml" @save="workspace.saveSnippet('YAML/JSON output', 'yaml-json', $event)" />
+      </template>
+    </EditorSplitView>
   </div>
 </template>

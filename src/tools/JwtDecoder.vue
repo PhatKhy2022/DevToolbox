@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import EditorSplitView from '@/components/EditorSplitView.vue'
 import ToolEditor from '@/components/ToolEditor.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { decodeJwt } from '@/utils/jwt'
@@ -33,7 +34,7 @@ function decode() {
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-3">
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
     <div class="flex flex-wrap items-center gap-2">
       <button class="primary-button" @click="decode">Decode payload</button>
       <span v-if="expiry?.expiresAt" class="rounded px-2 py-1 text-xs" :class="expiry.isExpired ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-200' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200'">
@@ -41,9 +42,13 @@ function decode() {
       </span>
       <span class="text-sm text-slate-500 dark:text-slate-400">{{ message }}</span>
     </div>
-    <div class="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
-      <ToolEditor v-model="token" title="JWT" language="token" placeholder="Paste JWT" filename="token.txt" @save="workspace.saveSnippet('JWT token', 'jwt', $event)" />
-      <ToolEditor v-model="output" title="Payload" language="json" readonly filename="jwt-payload.json" @save="workspace.saveSnippet('JWT payload', 'jwt', $event)" />
-    </div>
+    <EditorSplitView>
+      <template #first>
+        <ToolEditor v-model="token" title="JWT" language="token" placeholder="Paste JWT" filename="token.txt" @save="workspace.saveSnippet('JWT token', 'jwt', $event)" />
+      </template>
+      <template #second>
+        <ToolEditor v-model="output" title="Payload" language="json" readonly filename="jwt-payload.json" @save="workspace.saveSnippet('JWT payload', 'jwt', $event)" />
+      </template>
+    </EditorSplitView>
   </div>
 </template>

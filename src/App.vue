@@ -1,15 +1,19 @@
 <script setup lang="ts">
+import { Maximize2, Minimize2 } from '@lucide/vue'
 import { computed, defineAsyncComponent, onMounted, onUnmounted } from 'vue'
+import AppFooter from '@/components/AppFooter.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import HistoryPanel from '@/components/HistoryPanel.vue'
 import SidebarNav from '@/components/SidebarNav.vue'
 import WorkspaceTabs from '@/components/WorkspaceTabs.vue'
+import { useEditorViewStore } from '@/stores/editorView'
 import { syncPreferencesStore, usePreferencesStore } from '@/stores/preferences'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { ToolDefinition, ToolId } from '@/types/tool'
 
 const preferences = usePreferencesStore()
 const workspace = useWorkspaceStore()
+const editorView = useEditorViewStore()
 
 const tools: ToolDefinition[] = [
   { id: 'dashboard', name: 'Dashboard', description: 'Overview of all available tools.', shortcut: '1', component: defineAsyncComponent(() => import('@/tools/Dashboard.vue')) },
@@ -25,6 +29,12 @@ const tools: ToolDefinition[] = [
 ]
 
 const activeTool = computed(() => tools.find((tool) => tool.id === workspace.activeTool) ?? tools[0])
+
+// Dashboard and Vocabulary render flowing content (no internal scroll region of their own),
+// so <main> handles their scrolling. Every other tool embeds Monaco editors that already
+// scroll internally — letting <main> scroll too would show two scrollbars at once.
+const FLOWING_CONTENT_TOOLS: ToolId[] = ['dashboard', 'english-vocab']
+const mainScrollable = computed(() => FLOWING_CONTENT_TOOLS.includes(workspace.activeTool))
 
 function selectToolFromKey(event: KeyboardEvent) {
   if (!event.ctrlKey && !event.metaKey) return
@@ -48,34 +58,52 @@ onUnmounted(() => window.removeEventListener('keydown', selectToolFromKey))
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-    <SidebarNav :tools="tools" />
+  <div class="flex h-dvh flex-col overflow-hidden bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div class="flex min-h-0 flex-1">
+      <SidebarNav :tools="tools" />
 
-    <div class="flex min-w-0 flex-1 flex-col">
-      <AppHeader />
-      <WorkspaceTabs />
+      <div class="flex min-w-0 min-h-0 flex-1 flex-col">
+        <AppHeader />
+        <WorkspaceTabs />
 
-      <div class="flex min-h-0 flex-1">
-        <main class="scrollbar min-w-0 flex-1 overflow-auto p-3">
-          <div v-if="workspace.activeTool !== 'dashboard'" class="mb-3 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h1 class="text-xl font-semibold text-slate-950 dark:text-white">{{ activeTool.name }}</h1>
-              <p class="text-sm text-slate-500 dark:text-slate-400">{{ activeTool.description }}</p>
+        <div class="flex min-h-0 flex-1">
+          <main
+            class="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden p-3"
+            :class="mainScrollable ? 'scrollbar overflow-y-auto' : 'overflow-y-hidden'"
+          >
+            <div v-if="workspace.activeTool !== 'dashboard'" class="mb-3 flex shrink-0 flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h1 class="text-xl font-semibold text-slate-950 dark:text-white">{{ activeTool.name }}</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ activeTool.description }}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <select
+                  class="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm dark:border-slate-800 dark:bg-slate-900 md:hidden"
+                  :value="workspace.activeTool"
+                  @change="workspace.setTool(($event.target as HTMLSelectElement).value as ToolId)"
+                >
+                  <option v-for="tool in tools.filter(t => t.id !== 'dashboard')" :key="tool.id" :value="tool.id">{{ tool.name }}</option>
+                </select>
+                <button
+                  v-if="editorView.fullscreenTarget"
+                  class="icon-button size-8"
+                  :title="editorView.isFullscreen ? 'Exit fullscreen' : 'Fullscreen both panels'"
+                  @click="editorView.toggleFullscreen()"
+                >
+                  <Minimize2 v-if="editorView.isFullscreen" class="size-4" />
+                  <Maximize2 v-else class="size-4" />
+                </button>
+              </div>
             </div>
-            <select
-              class="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm dark:border-slate-800 dark:bg-slate-900 md:hidden"
-              :value="workspace.activeTool"
-              @change="workspace.setTool(($event.target as HTMLSelectElement).value as ToolId)"
-            >
-              <option v-for="tool in tools.filter(t => t.id !== 'dashboard')" :key="tool.id" :value="tool.id">{{ tool.name }}</option>
-            </select>
-          </div>
 
-          <component :is="activeTool.component" />
-        </main>
+            <component :is="activeTool.component" />
+          </main>
 
-        <HistoryPanel v-if="preferences.historyVisible" />
+          <HistoryPanel v-if="preferences.historyVisible" />
+        </div>
       </div>
     </div>
+
+    <AppFooter />
   </div>
 </template>

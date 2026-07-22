@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import EditorSplitView from '@/components/EditorSplitView.vue'
 import FileDropzone from '@/components/FileDropzone.vue'
 import ToolEditor from '@/components/ToolEditor.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
@@ -45,7 +46,7 @@ function downloadDecoded() {
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-3">
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
     <div class="grid gap-3 lg:grid-cols-[1fr_auto]">
       <FileDropzone @files="handleFiles" />
       <div class="flex flex-wrap content-start gap-2">
@@ -55,9 +56,13 @@ function downloadDecoded() {
         <span class="w-full text-sm text-slate-500 dark:text-slate-400">{{ message }}</span>
       </div>
     </div>
-    <div class="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
-      <ToolEditor v-model="input" title="Input" language="text/base64" placeholder="Paste text or Base64" filename="base64-input.txt" @save="workspace.saveSnippet('Base64 input', 'base64', $event)" />
-      <ToolEditor v-model="output" title="Output" language="text/base64" readonly filename="base64-output.txt" @save="workspace.saveSnippet('Base64 output', 'base64', $event)" />
-    </div>
+    <EditorSplitView>
+      <template #first>
+        <ToolEditor v-model="input" title="Input" language="text/base64" placeholder="Paste text or Base64" filename="base64-input.txt" @save="workspace.saveSnippet('Base64 input', 'base64', $event)" />
+      </template>
+      <template #second>
+        <ToolEditor v-model="output" title="Output" language="text/base64" readonly filename="base64-output.txt" @save="workspace.saveSnippet('Base64 output', 'base64', $event)" />
+      </template>
+    </EditorSplitView>
   </div>
 </template>

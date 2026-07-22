@@ -68,7 +68,7 @@ function openVocabulary() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-4xl py-8">
+  <div class="mx-auto w-full max-w-4xl shrink-0 pt-8 pb-16">
     <div class="mb-8 text-center">
       <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Developer Toolbox</h2>
       <p class="mt-2 text-slate-500 dark:text-slate-400">All-in-one productivity tools for developers.</p>

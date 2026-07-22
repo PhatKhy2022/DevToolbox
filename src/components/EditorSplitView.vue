@@ -1,0 +1,82 @@
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useEditorViewStore } from '@/stores/editorView'
+
+const editorView = useEditorViewStore()
+const containerRef = ref<HTMLElement | null>(null)
+const splitPercent = ref(50)
+const isRowLayout = ref(true)
+let dragging = false
+
+function updateOrientation() {
+  isRowLayout.value = window.matchMedia('(min-width: 1024px)').matches
+}
+
+function onDrag(event: PointerEvent) {
+  if (!dragging || !containerRef.value) return
+  const rect = containerRef.value.getBoundingClientRect()
+  const percent = isRowLayout.value
+    ? ((event.clientX - rect.left) / rect.width) * 100
+    : ((event.clientY - rect.top) / rect.height) * 100
+  splitPercent.value = Math.min(80, Math.max(20, percent))
+}
+
+function stopDrag() {
+  dragging = false
+  window.removeEventListener('pointermove', onDrag)
+  window.removeEventListener('pointerup', stopDrag)
+}
+
+function startDrag(event: PointerEvent) {
+  updateOrientation()
+  dragging = true
+  event.preventDefault()
+  window.addEventListener('pointermove', onDrag)
+  window.addEventListener('pointerup', stopDrag)
+}
+
+function resetSplit() {
+  splitPercent.value = 50
+}
+
+function handleFullscreenChange() {
+  editorView.setFullscreen(document.fullscreenElement === containerRef.value)
+}
+
+onMounted(() => {
+  editorView.register(containerRef.value)
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  editorView.register(null)
+  editorView.setFullscreen(false)
+  stopDrag()
+})
+
+const firstPaneStyle = computed(() => ({ flex: `0 0 ${splitPercent.value}%` }))
+</script>
+
+<template>
+  <div
+    ref="containerRef"
+    class="flex min-h-0 flex-1 flex-col lg:flex-row"
+    :class="editorView.isFullscreen ? 'bg-slate-100 p-3 dark:bg-slate-950' : ''"
+  >
+    <div class="flex min-h-0 min-w-0 flex-col overflow-hidden" :style="firstPaneStyle">
+      <slot name="first" />
+    </div>
+
+    <div
+      class="h-1 shrink-0 touch-none cursor-row-resize bg-slate-200 transition hover:bg-cyan-400 lg:h-auto lg:w-1 lg:cursor-col-resize dark:bg-slate-800"
+      title="Drag to resize · double-click to reset"
+      @pointerdown="startDrag"
+      @dblclick="resetSplit"
+    ></div>
+
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <slot name="second" />
+    </div>
+  </div>
+</template>

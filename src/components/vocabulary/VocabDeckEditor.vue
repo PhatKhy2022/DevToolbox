@@ -140,13 +140,14 @@ function cancelEdit() {
               <p v-if="card.example" class="mt-1 text-sm italic text-slate-500 dark:text-slate-400">{{ card.example }}</p>
             </div>
             <div class="flex shrink-0 gap-1">
-              <button type="button" class="icon-button" title="Edit" @click="startEdit(card.id)">
+              <button type="button" class="icon-button" title="Edit" :aria-label="`Edit ${card.term}`" @click="startEdit(card.id)">
                 <Pencil class="size-4" />
               </button>
               <button
                 type="button"
                 class="icon-button text-rose-600 dark:text-rose-400"
                 title="Delete"
+                :aria-label="`Delete ${card.term}`"
                 @click="vocabulary.deleteCard(deck.id, card.id)"
               >
                 <Trash2 class="size-4" />

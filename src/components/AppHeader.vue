@@ -36,13 +36,18 @@ function handleSearch(event: Event) {
 
 <template>
   <header class="flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-950">
-    <button class="icon-button" title="Toggle sidebar" @click="preferences.toggleSidebar()">
+    <button
+      class="icon-button"
+      title="Toggle sidebar"
+      :aria-label="preferences.sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+      @click="preferences.toggleSidebar()"
+    >
       <PanelLeftOpen v-if="preferences.sidebarCollapsed" class="size-4" />
       <PanelLeftClose v-else class="size-4" />
     </button>
 
     <div class="relative min-w-0 flex-1">
-      <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+      <Search aria-hidden="true" class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
       <input
         class="h-9 w-full rounded-md border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition focus:border-cyan-500 focus:bg-white dark:border-slate-800 dark:bg-slate-900 dark:focus:bg-slate-950"
         placeholder="Paste JSON, JWT, CSV, YAML, or Base64"
@@ -55,12 +60,22 @@ function handleSearch(event: Event) {
       New tab
     </button>
 
-    <button class="icon-button" title="Toggle dark mode" @click="preferences.toggleDarkMode()">
+    <button
+      class="icon-button"
+      title="Toggle dark mode"
+      :aria-label="preferences.darkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+      @click="preferences.toggleDarkMode()"
+    >
       <Sun v-if="preferences.darkMode" class="size-4" />
       <Moon v-else class="size-4" />
     </button>
 
-    <button class="icon-button hidden xl:flex" title="Toggle history" @click="preferences.toggleHistory()">
+    <button
+      class="icon-button hidden xl:flex"
+      title="Toggle history"
+      :aria-label="preferences.historyVisible ? 'Hide history panel' : 'Show history panel'"
+      @click="preferences.toggleHistory()"
+    >
       <PanelRightClose v-if="preferences.historyVisible" class="size-4" />
       <PanelRightOpen v-else class="size-4" />
     </button>

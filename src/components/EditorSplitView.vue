@@ -32,12 +32,29 @@ function startDrag(event: PointerEvent) {
   updateOrientation()
   dragging = true
   event.preventDefault()
+  ;(event.currentTarget as HTMLElement)?.focus()
   window.addEventListener('pointermove', onDrag)
   window.addEventListener('pointerup', stopDrag)
 }
 
 function resetSplit() {
   splitPercent.value = 50
+}
+
+function onDividerKeydown(event: KeyboardEvent) {
+  updateOrientation()
+  const step = 4
+  let delta = 0
+  if (isRowLayout.value) {
+    if (event.key === 'ArrowLeft') delta = -step
+    else if (event.key === 'ArrowRight') delta = step
+  } else {
+    if (event.key === 'ArrowUp') delta = -step
+    else if (event.key === 'ArrowDown') delta = step
+  }
+  if (delta === 0) return
+  event.preventDefault()
+  splitPercent.value = Math.min(80, Math.max(20, splitPercent.value + delta))
 }
 
 function handleFullscreenChange() {
@@ -69,6 +86,7 @@ const firstPaneStyle = computed(() => ({ flex: `0 0 ${splitPercent.value}%` }))
       v-if="editorView.isFullscreen"
       class="icon-button absolute right-3 top-3 z-10 size-8"
       title="Exit fullscreen"
+      aria-label="Exit fullscreen"
       @click="editorView.toggleFullscreen()"
     >
       <Minimize2 class="size-4" />
@@ -79,10 +97,15 @@ const firstPaneStyle = computed(() => ({ flex: `0 0 ${splitPercent.value}%` }))
     </div>
 
     <div
-      class="h-1 shrink-0 touch-none cursor-row-resize bg-slate-200 transition hover:bg-cyan-400 lg:h-auto lg:w-1 lg:cursor-col-resize dark:bg-slate-800"
+      class="h-1 shrink-0 touch-none cursor-row-resize bg-slate-200 transition hover:bg-cyan-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 lg:h-auto lg:w-1 lg:cursor-col-resize dark:bg-slate-800"
+      role="separator"
+      :aria-orientation="isRowLayout ? 'vertical' : 'horizontal'"
+      aria-label="Resize panels"
+      tabindex="0"
       title="Drag to resize · double-click to reset"
       @pointerdown="startDrag"
       @dblclick="resetSplit"
+      @keydown="onDividerKeydown"
     ></div>
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">

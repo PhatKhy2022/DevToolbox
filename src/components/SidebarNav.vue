@@ -58,6 +58,7 @@ const workspace = useWorkspaceStore()
             : 'text-slate-600 hover:bg-white hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white'
         "
         :title="tool.name"
+        :aria-label="tool.name"
         @click="workspace.setTool(tool.id)"
       >
         <component :is="icons[tool.id]" class="size-4 shrink-0" />

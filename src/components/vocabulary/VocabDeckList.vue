@@ -99,6 +99,7 @@ function logout() {
             type="button"
             class="icon-button text-rose-600 dark:text-rose-400"
             title="Delete set"
+            :aria-label="`Delete '${deck.title}' set`"
             @click="vocabulary.deleteDeck(deck.id)"
           >
             <Trash2 class="size-4" />

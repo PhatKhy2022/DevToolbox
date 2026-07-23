@@ -88,6 +88,7 @@ onUnmounted(() => window.removeEventListener('keydown', selectToolFromKey))
                   v-if="editorView.fullscreenTarget && !editorView.isFullscreen"
                   class="icon-button size-8"
                   title="Fullscreen both panels"
+                  aria-label="Fullscreen both panels"
                   @click="editorView.toggleFullscreen()"
                 >
                   <Maximize2 class="size-4" />

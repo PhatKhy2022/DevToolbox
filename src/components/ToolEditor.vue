@@ -124,13 +124,13 @@ async function copy() {
       <span class="hidden rounded bg-slate-100 px-2 py-0.5 text-[11px] uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-400 sm:inline">
         {{ language }}
       </span>
-      <button class="icon-button size-8" title="Copy" :disabled="!modelValue" @click="copy">
+      <button class="icon-button size-8" title="Copy" aria-label="Copy" :disabled="!modelValue" @click="copy">
         <Copy class="size-4" />
       </button>
-      <button class="icon-button size-8" title="Download" :disabled="!modelValue" @click="downloadText(filename, modelValue)">
+      <button class="icon-button size-8" title="Download" aria-label="Download" :disabled="!modelValue" @click="downloadText(filename, modelValue)">
         <Download class="size-4" />
       </button>
-      <button class="icon-button size-8" title="Save snippet" :disabled="!modelValue" @click="emit('save', modelValue)">
+      <button class="icon-button size-8" title="Save snippet" aria-label="Save snippet" :disabled="!modelValue" @click="emit('save', modelValue)">
         <Save class="size-4" />
       </button>
       <span v-if="copied" class="text-xs text-cyan-600 dark:text-cyan-300">Copied</span>

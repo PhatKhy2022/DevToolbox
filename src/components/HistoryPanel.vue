@@ -45,8 +45,9 @@ function deleteSnippet(e: Event, id: string) {
             <div class="truncate text-slate-500">{{ new Date(item.createdAt).toLocaleString() }}</div>
           </button>
           <button
-            class="absolute right-1 top-1 hidden size-6 items-center justify-center rounded-md bg-white text-slate-400 hover:bg-red-50 hover:text-red-500 group-hover:flex dark:bg-slate-900 dark:hover:bg-red-950/30"
+            class="absolute right-1 top-1 flex size-6 items-center justify-center rounded-md bg-white text-slate-400 opacity-0 hover:bg-red-50 hover:text-red-500 focus:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 dark:bg-slate-900 dark:hover:bg-red-950/30"
             title="Delete item"
+            :aria-label="`Delete '${item.label}' from history`"
             @click="deleteHistoryItem($event, item.id)"
           >
             <X class="size-3.5" />
@@ -84,8 +85,9 @@ function deleteSnippet(e: Event, id: string) {
             <div class="truncate text-slate-500">{{ snippet.toolId }}</div>
           </button>
           <button
-            class="absolute right-1 top-1 hidden size-6 items-center justify-center rounded-md bg-white text-slate-400 hover:bg-red-50 hover:text-red-500 group-hover:flex dark:bg-slate-900 dark:hover:bg-red-950/30"
+            class="absolute right-1 top-1 flex size-6 items-center justify-center rounded-md bg-white text-slate-400 opacity-0 hover:bg-red-50 hover:text-red-500 focus:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 dark:bg-slate-900 dark:hover:bg-red-950/30"
             title="Delete snippet"
+            :aria-label="`Delete snippet '${snippet.name}'`"
             @click="deleteSnippet($event, snippet.id)"
           >
             <X class="size-3.5" />

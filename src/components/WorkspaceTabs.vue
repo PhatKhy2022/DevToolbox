@@ -16,16 +16,29 @@ const workspace = useWorkspaceStore()
       <span v-if="workspace.tabs.length === 0">Dashboard</span>
     </button>
 
-    <button
+    <div
       v-for="tab in workspace.tabs"
       :key="tab.id"
-      class="flex h-full min-w-36 max-w-48 items-center gap-2 border-r border-slate-200 px-3 text-sm dark:border-slate-800"
+      class="flex h-full min-w-36 max-w-48 items-center gap-1 border-r border-slate-200 pl-3 pr-1.5 text-sm dark:border-slate-800"
       :class="workspace.activeTabId === tab.id ? 'bg-white text-cyan-700 dark:bg-slate-950 dark:text-cyan-200' : 'text-slate-500 hover:bg-white/70 dark:text-slate-400 dark:hover:bg-slate-950/60'"
-      @click="workspace.activeTabId = tab.id; workspace.activeTool = tab.toolId; workspace.persist()"
     >
-      <span class="truncate">{{ tab.title }}</span>
-      <X class="ml-auto size-3.5 shrink-0" @click.stop="workspace.closeTab(tab.id)" />
-    </button>
+      <button
+        type="button"
+        class="flex min-w-0 flex-1 items-center text-left focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan-500"
+        @click="workspace.activeTabId = tab.id; workspace.activeTool = tab.toolId; workspace.persist()"
+      >
+        <span class="truncate">{{ tab.title }}</span>
+      </button>
+      <button
+        type="button"
+        class="flex size-5 shrink-0 items-center justify-center rounded text-current/70 transition hover:bg-slate-200 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        :aria-label="`Close ${tab.title} tab`"
+        title="Close tab"
+        @click="workspace.closeTab(tab.id)"
+      >
+        <X class="size-3.5" />
+      </button>
+    </div>
 
     <div v-if="workspace.tabs.length > 0" class="ml-auto px-3">
       <button

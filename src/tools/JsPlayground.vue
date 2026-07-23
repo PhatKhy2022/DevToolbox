@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { Play, Trash2 } from '@lucide/vue'
+import EditorSplitView from '@/components/EditorSplitView.vue'
 import ToolEditor from '@/components/ToolEditor.vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 
@@ -59,7 +60,7 @@ function clearOutput() {
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-3">
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
     <div class="flex flex-wrap items-center gap-2">
       <button class="primary-button" @click="runCode">
         <Play class="mr-2 size-4" />
@@ -70,23 +71,27 @@ function clearOutput() {
         Clear Console
       </button>
     </div>
-    <div class="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
-      <ToolEditor
-        v-model="input"
-        title="JavaScript Editor"
-        language="javascript"
-        placeholder="console.log('Hello');"
-        filename="playground.js"
-        @save="workspace.saveSnippet('JS Playground', 'js-playground', $event)"
-      />
-      <ToolEditor
-        v-model="output"
-        title="Console Output"
-        language="bash"
-        readonly
-        placeholder="Output will appear here..."
-        filename="console.log"
-      />
-    </div>
+    <EditorSplitView>
+      <template #first>
+        <ToolEditor
+          v-model="input"
+          title="JavaScript Editor"
+          language="javascript"
+          placeholder="console.log('Hello');"
+          filename="playground.js"
+          @save="workspace.saveSnippet('JS Playground', 'js-playground', $event)"
+        />
+      </template>
+      <template #second>
+        <ToolEditor
+          v-model="output"
+          title="Console Output"
+          language="bash"
+          readonly
+          placeholder="Output will appear here..."
+          filename="console.log"
+        />
+      </template>
+    </EditorSplitView>
   </div>
 </template>

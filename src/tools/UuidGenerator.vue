@@ -15,7 +15,7 @@ function generate() {
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-3">
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
     <div class="flex flex-wrap items-center gap-2">
       <label class="text-sm text-slate-500 dark:text-slate-400" for="uuid-count">Count</label>
       <input id="uuid-count" v-model.number="count" class="h-9 w-24 rounded-md border border-slate-200 bg-white px-2 text-sm dark:border-slate-800 dark:bg-slate-900" type="number" min="1" max="1000" />

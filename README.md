@@ -38,5 +38,6 @@ src/
   types/            Shared TypeScript types
   utils/            File, parser, storage, clipboard, and download helpers
 ```
+----------------
 
 All data stays in the browser through localStorage. Vocabulary accounts and decks are stored per browser (not synced to a server).

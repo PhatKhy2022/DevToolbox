@@ -118,7 +118,7 @@ async function copy() {
 </script>
 
 <template>
-  <section class="panel flex min-h-80 flex-1 flex-col rounded-md overflow-hidden">
+  <section class="panel flex min-h-48 flex-1 flex-col rounded-md overflow-hidden">
     <div class="flex h-10 shrink-0 items-center gap-2 border-b border-slate-200 px-3 dark:border-slate-800">
       <div class="min-w-0 flex-1 truncate text-sm font-medium">{{ title }}</div>
       <span class="hidden rounded bg-slate-100 px-2 py-0.5 text-[11px] uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-400 sm:inline">

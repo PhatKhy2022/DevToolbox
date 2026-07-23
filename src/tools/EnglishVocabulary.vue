@@ -51,7 +51,7 @@ function backToDecks() {
 </script>
 
 <template>
-  <div class="py-2">
+  <div class="w-full shrink-0 pt-2 pb-16">
     <VocabAuthForm v-if="!auth.isLoggedIn" />
 
     <template v-else>

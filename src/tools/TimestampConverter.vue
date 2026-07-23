@@ -33,8 +33,8 @@ function toTimestamp() {
 </script>
 
 <template>
-  <div class="grid h-full gap-3 lg:grid-cols-[360px_1fr]">
-    <section class="panel rounded-md p-4">
+  <div class="grid min-h-0 flex-1 gap-3 lg:grid-cols-[360px_1fr]">
+    <section class="panel min-h-0 overflow-y-auto rounded-md p-4">
       <div class="space-y-4">
         <label class="block">
           <span class="mb-1 block text-sm text-slate-500 dark:text-slate-400">Unix timestamp</span>

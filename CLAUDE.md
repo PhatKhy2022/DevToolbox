@@ -2,62 +2,68 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project overview
-
-DevToolbox is a frontend-only developer utility toolbox (JSON formatter, CSV/YAML converters, JWT decoder, UUID generator, Base64 tool, timestamp converter, JS playground, and an English vocabulary flashcard app). Built with Vue 3 (Composition API + `<script setup>`), TypeScript, Vite, Tailwind CSS v4, and Pinia.
-
-There is no backend and no database. Everything persists to the browser's `localStorage`. This is a hard constraint, not an oversight — do not introduce server calls, databases, or backend-only dependencies (see CONTRIBUTING.md).
-
 ## Commands
 
 ```bash
-npm run dev        # start Vite dev server on 0.0.0.0
-npm run build      # type-check (vue-tsc -b) then production build
-npm run preview    # preview the production build on 0.0.0.0
-npm run typecheck  # vue-tsc -b only, no build
+npm install       # install dependencies
+npm run dev        # start Vite dev server (0.0.0.0, hot reload)
+npm run build       # vue-tsc -b (typecheck) then vite build
+npm run preview      # preview production build (0.0.0.0)
+npm run typecheck     # vue-tsc -b only, no build output
 ```
 
-There is no test suite, lint script, or formatter configured. `npm run build` (which runs `vue-tsc -b`) is the only correctness gate — always run it before considering a change done.
+There is no test runner or lint script configured in `package.json` — do not assume `npm test` or `npm run lint` exist. Always run `npm run build` (or `npm run typecheck`) before considering a change complete, since `vue-tsc -b` is the only correctness check in this repo.
+
+There is no single-test command since there is no test framework.
 
 ## Architecture
 
-### Tool registration is centralized in `App.vue`
+DevToolbox is a **frontend-only, no-backend** developer utility app (Vue 3 + TypeScript + Vite + Tailwind CSS v4 + Pinia). Every feature must work with zero server/database — all persistence is `localStorage` via `src/utils/storage.ts` (`loadJson`/`saveJson`). Do not introduce backend calls, databases, or server-only dependencies (see `CONTRIBUTING.md`).
 
-Every tool is declared once in the `tools` array in `src/App.vue` as a `ToolDefinition` (`src/types/tool.ts`): id, name, description, keyboard shortcut, and a `defineAsyncComponent` pointing at `src/tools/<Tool>.vue`. `App.vue` renders whichever tool is active via `<component :is="activeTool.component" />`. Adding a new tool means: add its `ToolId`, add the entry to this array, and create the matching file in `src/tools/`.
+### Tool registration (the core extension point)
 
-`Ctrl/Cmd+<shortcut digit>` switches tools; `Ctrl/Cmd+N` opens a new tab for the current tool. This is wired in `App.vue`'s `selectToolFromKey`.
+Each utility ("tool") is a single Vue component under `src/tools/`. Tools are registered in one place, `src/App.vue`, as a `ToolDefinition[]` array (id, name, description, keyboard shortcut, async component). `src/types/tool.ts` defines the `ToolId` union — adding a new tool means:
+1. Add the id to the `ToolId` union in `src/types/tool.ts`.
+2. Create the component in `src/tools/`.
+3. Register it (with a `defineAsyncComponent` import) in the `tools` array in `src/App.vue`.
 
-### Workspace store drives tabs, history, and snippets (`src/stores/workspace.ts`)
+`Ctrl/Cmd+<shortcut digit>` switches tools; `Ctrl/Cmd+N` opens a new tab for the current tool (see `selectToolFromKey` in `App.vue`).
 
-Most tools are multi-tab (one `WorkspaceTab` per open instance, each with its own `input`); `dashboard` and `english-vocab` are listed in `TOOLS_WITHOUT_TABS` and bypass tabs entirely. The store also holds a global `history` (last 30 entries, capped and pruned in `addHistory`) and saved `snippets`, both shown in `HistoryPanel.vue`. Every mutating action ends by calling `this.persist()`, which serializes the whole state to `localStorage` under `devtoolbox:workspace`. When adding store state, follow this same "mutate then persist()" pattern rather than relying on a generic watcher.
+### Workspace store (tabs/history/snippets)
 
-### Pinia stores are hand-persisted, not plugin-persisted
+`src/stores/workspace.ts` (Pinia) is the shared state for most tools: multi-tab editing (`tabs`/`activeTabId`), recent-value `history` (capped at 30 items), and saved `snippets`. Every mutation ends by calling `this.persist()`, which serializes the whole state to `localStorage` under `devtoolbox:workspace` — there is no reactive/automatic persistence, so any new state field must be added to `persist()` explicitly.
 
-There's no `pinia-plugin-persistedstate`. Every store follows the same manual pattern: read initial state via `loadJson(KEY, fallback)` from `src/utils/storage.ts` at module scope, then call `saveJson(KEY, ...)` inside actions (or a `watch(..., { deep: true })`, as in `preferences.ts`) after every change. `loadJson`/`saveJson` swallow errors and fall back silently — keep using them rather than touching `localStorage` directly.
+`TOOLS_WITHOUT_TABS` (`dashboard`, `english-vocab`) opt tools out of the tab system — these tools manage their own view state instead of `workspace.activeTab`.
 
-### Vocabulary tool has its own local auth and per-user namespacing
+Most tool components follow the same pattern: read initial value from `workspace.activeTab?.input`, `watch(input, ...)` to call `workspace.updateActiveInput`, and `watch(() => workspace.activeTabId, ...)` to reload input when the active tab changes.
 
-`english-vocab` is the one tool with account-like behavior, but it is still fully client-side — there is no server:
-- `stores/vocabAuth.ts` implements register/login against a `VocabAuthRegistry` stored under a single `devtoolbox:vocab-auth` key (`username -> { passwordHash, salt }`). Passwords are hashed with PBKDF2-SHA256 via WebCrypto (`src/utils/crypto.ts`), never stored in plaintext. The active session lives under `devtoolbox:vocab-session`.
-- `stores/vocabulary.ts` stores each user's decks under a per-user key `devtoolbox:vocab-data:<username>` (see `dataKey()`). Call `syncForUser()` when the active user may have changed — it's a no-op if `loadedFor` already matches the current username, and it clears `decks` when logged out.
-- Components live in `src/components/vocabulary/` (`VocabAuthForm`, `VocabDeckList`, `VocabDeckEditor`, `VocabStudyMode`).
+### Preferences store
 
-This is browser-local "auth" for UX separation between users of the same browser, not a real security boundary — don't upgrade its threat model without the user asking for it.
+`src/stores/preferences.ts` holds `darkMode`/`sidebarCollapsed`/`historyVisible`, persisted to `devtoolbox:preferences`. `syncPreferencesStore()` (called once in `App.vue` `onMounted`) wires a `watch` that persists on change and toggles the `dark` class on `document.documentElement` — dark mode is plain Tailwind `dark:` variants, not a CSS-in-JS theme system.
 
-### Utils follow a `ParseResult<T>` convention for fallible parsing
+### English Vocabulary sub-app
 
-`src/utils/json.ts`, `csv.ts`, `yaml`-handling code, etc. return `{ ok, data?, error? }` instead of throwing, so tool components can branch on `.ok` and surface `.error` in the UI directly. Follow this convention for new parse/convert utilities rather than throwing exceptions.
+`english-vocab` is a self-contained mini-app nested inside the toolbox, with its own auth and data layer, all still localStorage-only:
+- `src/stores/vocabAuth.ts`: local "accounts" keyed by username, password hashed with PBKDF2 (`src/utils/crypto.ts`), stored in `devtoolbox:vocab-auth`. This is *not* real security — it's just to separate per-browser-user data, not to protect against a determined attacker with local storage access.
+- `src/stores/vocabulary.ts`: decks/cards persisted **per user** under `devtoolbox:vocab-data:<username>` (via `dataKey()`), loaded lazily by `syncForUser()` and guarded by `loadedFor` so data isn't reloaded redundantly.
+- Components live under `src/components/vocabulary/` (auth form, deck list/editor, study mode) and are orchestrated by `src/tools/EnglishVocabulary.vue`.
 
-`src/utils/detect.ts` implements paste-and-autodetect (JSON → JWT → Base64 → CSV → YAML → text, in that priority order) used to guess content type on paste.
+### Editor component
 
-### Shared editor: `ToolEditor.vue`
+`src/components/ToolEditor.vue` wraps Monaco Editor (not CodeMirror, despite an older commit title) and is the shared input/output panel used by nearly every tool: copy/download/save-snippet buttons, language-aware syntax highlighting (`getMonacoLanguage` maps a few aliases like `js`→`javascript`), and dark-mode-aware theme switching. Monaco web workers are pre-bundled via `optimizeDeps.include` in `vite.config.ts` — if you add a new Monaco language, its worker may need to be added there too.
 
-Nearly every tool embeds `src/components/ToolEditor.vue`, a Monaco-based editor wrapper handling copy/download/save-snippet buttons, language switching, and dark-mode theme sync. Monaco workers are registered once in `src/main.ts` (`self.MonacoEnvironment`) and Monaco language ids are aliased in `ToolEditor.vue`'s `getMonacoLanguage` (e.g. `js` -> `javascript`, `yml` -> `yaml`) — extend that map rather than passing raw Monaco ids into tool components.
+### JS Playground sandboxing
 
-### Styling conventions
+`src/tools/JsPlayground.vue` runs user code via `new Function('console', code)` with a stubbed-out `console` (log/error/warn/clear) that captures output into an array instead of executing in a real sandbox/iframe. There is no isolation from the page's JS context — treat this as a convenience tool, not a secure sandbox, when modifying it.
 
-Tailwind v4 is loaded via `@tailwindcss/vite` (no `tailwind.config.js`); dark mode uses a custom variant keyed off a `.dark` class on `<html>` (toggled by `preferences.hydrateDom()`), not `prefers-color-scheme`. Shared component classes (`.panel`, `.primary-button`, `.secondary-button`, `.icon-button`) are defined once in `src/styles.css` via `@apply` — reuse these instead of re-authoring button/panel styles per tool.
+### Content auto-detection
+
+`src/utils/detect.ts` (`detectContent`) sniffs pasted text as JSON/YAML/JWT/CSV/base64/text using cheap heuristics (tried in a specific order — JSON parse first, then JWT/base64/CSV/YAML regexes). Order matters because inputs can match multiple patterns loosely.
 
 ### Path alias
 
-`@/*` maps to `src/*` (configured in both `vite.config.ts` and `tsconfig.app.json`) — use it for all intra-`src` imports.
+`@/*` resolves to `src/*` (configured in both `tsconfig.app.json` and `vite.config.ts`) — always import via `@/...`, not relative paths, matching the existing codebase convention.
+
+### Styling
+
+Tailwind CSS v4 via the `@tailwindcss/vite` plugin (no `tailwind.config.js` — v4 uses CSS-based config, see `src/styles.css`). Reusable classes like `primary-button`, `secondary-button`, `icon-button`, `panel` are defined there and used across tool components instead of repeating Tailwind utility strings.

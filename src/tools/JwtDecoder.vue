@@ -11,7 +11,12 @@ const output = ref('')
 const message = ref('Decode JWT payload')
 
 watch(token, (value) => workspace.updateActiveInput(value))
-watch(() => workspace.activeTabId, () => (token.value = workspace.activeTab?.input ?? ''))
+watch(
+  () => workspace.activeTab?.input,
+  (value) => {
+    if (value !== undefined && value !== token.value) token.value = value
+  },
+)
 
 const expiry = computed(() => {
   try {

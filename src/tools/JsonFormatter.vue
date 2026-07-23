@@ -12,7 +12,12 @@ const output = ref('')
 const status = ref('Ready')
 
 watch(input, (value) => workspace.updateActiveInput(value))
-watch(() => workspace.activeTabId, () => (input.value = workspace.activeTab?.input ?? ''))
+watch(
+  () => workspace.activeTab?.input,
+  (value) => {
+    if (value !== undefined && value !== input.value) input.value = value
+  },
+)
 
 const valid = computed(() => parseJson(input.value).ok)
 

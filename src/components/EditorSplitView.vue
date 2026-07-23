@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Minimize2 } from '@lucide/vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useEditorViewStore } from '@/stores/editorView'
 
@@ -61,9 +62,18 @@ const firstPaneStyle = computed(() => ({ flex: `0 0 ${splitPercent.value}%` }))
 <template>
   <div
     ref="containerRef"
-    class="flex min-h-0 flex-1 flex-col lg:flex-row"
+    class="relative flex min-h-0 flex-1 flex-col lg:flex-row"
     :class="editorView.isFullscreen ? 'bg-slate-100 p-3 dark:bg-slate-950' : ''"
   >
+    <button
+      v-if="editorView.isFullscreen"
+      class="icon-button absolute right-3 top-3 z-10 size-8"
+      title="Exit fullscreen"
+      @click="editorView.toggleFullscreen()"
+    >
+      <Minimize2 class="size-4" />
+    </button>
+
     <div class="flex min-h-0 min-w-0 flex-col overflow-hidden" :style="firstPaneStyle">
       <slot name="first" />
     </div>

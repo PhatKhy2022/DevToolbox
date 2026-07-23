@@ -52,6 +52,10 @@ Most tool components follow the same pattern: read initial value from `workspace
 
 `src/components/ToolEditor.vue` wraps Monaco Editor (not CodeMirror, despite an older commit title) and is the shared input/output panel used by nearly every tool: copy/download/save-snippet buttons, language-aware syntax highlighting (`getMonacoLanguage` maps a few aliases like `js`→`javascript`), and dark-mode-aware theme switching. Monaco web workers are pre-bundled via `optimizeDeps.include` in `vite.config.ts` — if you add a new Monaco language, its worker may need to be added there too.
 
+### Split view and fullscreen
+
+Two-panel tools (`json`, `csv-json`, `yaml-json`, `jwt`, `base64`, `js-playground`) wrap their pair of `ToolEditor` instances in `src/components/EditorSplitView.vue`, passed via the `#first`/`#second` slots. It renders a draggable divider (resizes 20%–80%, double-click resets to 50%, orientation flips from row to column below the `lg` breakpoint) and registers its container element with `src/stores/editorView.ts` (Pinia) on mount. That store just tracks `fullscreenTarget`/`isFullscreen`; the actual fullscreen toggle button lives in `App.vue`'s tool header and calls the Fullscreen API on the registered element. A tool only gets the fullscreen button if it uses `EditorSplitView` — single-panel tools (`dashboard`, `uuid`, `timestamp`, `english-vocab`) don't register a target, so `editorView.fullscreenTarget` stays null and the button doesn't render.
+
 ### JS Playground sandboxing
 
 `src/tools/JsPlayground.vue` runs user code via `new Function('console', code)` with a stubbed-out `console` (log/error/warn/clear) that captures output into an array instead of executing in a real sandbox/iframe. There is no isolation from the page's JS context — treat this as a convenience tool, not a secure sandbox, when modifying it.

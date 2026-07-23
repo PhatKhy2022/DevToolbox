@@ -11,7 +11,12 @@ const output = ref('')
 const message = ref('YAML and JSON converter')
 
 watch(input, (value) => workspace.updateActiveInput(value))
-watch(() => workspace.activeTabId, () => (input.value = workspace.activeTab?.input ?? ''))
+watch(
+  () => workspace.activeTab?.input,
+  (value) => {
+    if (value !== undefined && value !== input.value) input.value = value
+  },
+)
 
 function yamlToJson() {
   try {

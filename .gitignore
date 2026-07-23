@@ -8,3 +8,4 @@ Thumbs.db
 *.tsbuildinfo
 node_modules/.tmp
 np
+.playwright-mcp

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Maximize2, Minimize2 } from '@lucide/vue'
+import { Maximize2 } from '@lucide/vue'
 import { computed, defineAsyncComponent, onMounted, onUnmounted } from 'vue'
 import AppFooter from '@/components/AppFooter.vue'
 import AppHeader from '@/components/AppHeader.vue'
@@ -85,13 +85,12 @@ onUnmounted(() => window.removeEventListener('keydown', selectToolFromKey))
                   <option v-for="tool in tools.filter(t => t.id !== 'dashboard')" :key="tool.id" :value="tool.id">{{ tool.name }}</option>
                 </select>
                 <button
-                  v-if="editorView.fullscreenTarget"
+                  v-if="editorView.fullscreenTarget && !editorView.isFullscreen"
                   class="icon-button size-8"
-                  :title="editorView.isFullscreen ? 'Exit fullscreen' : 'Fullscreen both panels'"
+                  title="Fullscreen both panels"
                   @click="editorView.toggleFullscreen()"
                 >
-                  <Minimize2 v-if="editorView.isFullscreen" class="size-4" />
-                  <Maximize2 v-else class="size-4" />
+                  <Maximize2 class="size-4" />
                 </button>
               </div>
             </div>

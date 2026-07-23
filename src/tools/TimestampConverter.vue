@@ -23,7 +23,7 @@ function toDate() {
 
 function toTimestamp() {
   try {
-    output.value = dateToTimestamp(date.value)
+    output.value = dateToTimestamp(date.value, timezone.value)
     message.value = 'Date converted'
     workspace.addHistory('timestamp', 'Date to timestamp', date.value)
   } catch (error) {

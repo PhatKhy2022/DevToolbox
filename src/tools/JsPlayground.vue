@@ -10,7 +10,12 @@ const input = ref(workspace.activeTab?.input ?? '// Write your JavaScript here\n
 const output = ref('')
 
 watch(input, (value) => workspace.updateActiveInput(value))
-watch(() => workspace.activeTabId, () => (input.value = workspace.activeTab?.input ?? ''))
+watch(
+  () => workspace.activeTab?.input,
+  (value) => {
+    if (value !== undefined && value !== input.value) input.value = value
+  },
+)
 
 function runCode() {
   const logs: string[] = []
